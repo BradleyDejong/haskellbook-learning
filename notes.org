@@ -38,10 +38,8 @@
 *** The =Bounded= typeclass
 - has minBound and maxBound
   
-#+BEGIN_SRC haskell
-  maxBound :: Int8
-#+END_SRC
-result of the above: =127=
+  : GHCi> maxBound :: Int8
+  : 127
 
 *** Operators (these work on the =Ord= typeclass)
 **** ==  -- equality
@@ -62,9 +60,56 @@ Either =True= or =False=
 A type that can contain multiple values. May contain values of different types. Generally, you see tuples limited to 5-tuples or smaller
 
 =(1,2)= is valid, so is =(1, "Brad")=
-- =:info (,)= 
-data (,) a b = (,) a b
+  : GHCi> :info (,)
+  : data (,) a b = (,) a b
 
 
 * Chapter 5 -- Types
   
+** Function constructor
+=->= is type constructor for functions in Haskell
+
+ : GHCi> :info (->)
+ : data (->) t1 t2
+
+This looks similar to the tuple constructor =(,)=. Function constructor must have 2 args, one input and one result. Note: this is *not* a data constructor. Functions at the type level are *values*
+
+  : fst :: (a,b) -> a
+  Function takes 2 params =(a,b)= and =a=. 
+
+
+** Typeclass constraints
+Puts a constraint on a type variable
+  : GHCi> :type (+)
+  : (+) :: Num a => a -> a -> a
+
+** Uncurry
+Can change functions from curried fns (default) to accepting tuples
+  : GHCi> :t (+)
+  : (+) :: Num a => a -> a -> a
+
+  : GHCi> :t uncurry (+)
+  : uncurry (+) :: Num a => (a, a) -> a
+  
+** Sectioning
+Partially applying infix operators
+
+  : GHCi> let y = (2^)
+  : GHCi> y 5
+  : 32
+  
+Even works with typically-prefix functions using bacticks!
+
+  : GHCi> let c = (`elem` [1..10])
+  : GHCi> c 9
+  : True
+  
+** Type inference
+Don't necessarily need to declare types (though you should when the code is 'done')
+
+  : GHCi> let myHello x = "Hello " ++ x
+  : GHCi> myHello "Fred"
+  : "Hello Fred"
+
+  : GHCi> :t myHello
+  : myHello :: [Char] -> [Char]
