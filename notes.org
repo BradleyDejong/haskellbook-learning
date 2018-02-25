@@ -1,0 +1,70 @@
+
+* Chapter 4
+- Sum types -- example [[file:ch04/mood.hs][Mood.hs]]
+** Numeric types
+- All have typeclass of =Num=
+
+*** Integral
+- Most of the time, should use =Integer= unless limits of =Int= are understood and the performance gains are relevant
+**** =Int=
+- Fixed precision integer. Cannot be arbitrarily large or small
+**** =Integer=
+- Supports arbitrarily large/small numbers
+**** examples
+- 1
+- 2
+- 199
+- 1283719823798714
+
+**** Not integrals:
+- 1.3
+- 1/2
+  
+*** Fractional
+**** =Float=
+- Single precision floating point nums. Precision is a certian number of bits, shared between before and after the decimal
+- Generally should not be used in business applications
+**** =Double=
+- Double-precision floating point number
+**** =Rational=
+- Represents ratio of 2 integers (e.g. =1/2 \:\: Rational=)
+- Arbitrariy precise, but not as efficient as Scientific
+**** =Scientific=
+- Space efficient and near arbitrary precision.
+- Represented using scientific notation
+- Stores coefficient as =Integer= and exponent as =Int=
+- There is technically a limit since =Int= is not arbitrarily large, but unlikely that you will hit the limit
+  
+*** The =Bounded= typeclass
+- has minBound and maxBound
+  
+#+BEGIN_SRC haskell
+  maxBound :: Int8
+#+END_SRC
+result of the above: =127=
+
+*** Operators (these work on the =Ord= typeclass)
+**** ==  -- equality
+**** < -- less than
+**** > -- greater than
+**** /= -- Not equal
+
+** Typeclasses
+- Way of adding functionality to types that is reusable across all the types that have instances of that typeclass
+  
+** Bool
+Either =True= or =False=
+*** Operators
+- =&&=
+- =||=
+
+** Tuples
+A type that can contain multiple values. May contain values of different types. Generally, you see tuples limited to 5-tuples or smaller
+
+=(1,2)= is valid, so is =(1, "Brad")=
+- =:info (,)= 
+data (,) a b = (,) a b
+
+
+* Chapter 5 -- Types
+  
