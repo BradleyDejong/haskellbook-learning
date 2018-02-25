@@ -5,7 +5,8 @@
 - All have typeclass of =Num=
 
 *** Integral
-- Most of the time, should use =Integer= unless limits of =Int= are understood and the performance gains are relevant
+- Most of the time, should use =Integer= unless limits of =Int= are understood
+  and the performance gains are relevant
 **** =Int=
 - Fixed precision integer. Cannot be arbitrarily large or small
 **** =Integer=
@@ -22,7 +23,8 @@
   
 *** Fractional
 **** =Float=
-- Single precision floating point nums. Precision is a certian number of bits, shared between before and after the decimal
+- Single precision floating point nums. Precision is a certian number of bits,
+  shared between before and after the decimal
 - Generally should not be used in business applications
 **** =Double=
 - Double-precision floating point number
@@ -33,7 +35,8 @@
 - Space efficient and near arbitrary precision.
 - Represented using scientific notation
 - Stores coefficient as =Integer= and exponent as =Int=
-- There is technically a limit since =Int= is not arbitrarily large, but unlikely that you will hit the limit
+- There is technically a limit since =Int= is not arbitrarily large, but
+  unlikely that you will hit the limit
   
 *** The =Bounded= typeclass
 - has minBound and maxBound
@@ -48,7 +51,8 @@
 **** /= -- Not equal
 
 ** Typeclasses
-- Way of adding functionality to types that is reusable across all the types that have instances of that typeclass
+- Way of adding functionality to types that is reusable across all the types
+  that have instances of that typeclass
   
 ** Bool
 Either =True= or =False=
@@ -57,7 +61,8 @@ Either =True= or =False=
 - =||=
 
 ** Tuples
-A type that can contain multiple values. May contain values of different types. Generally, you see tuples limited to 5-tuples or smaller
+A type that can contain multiple values. May contain values of different
+types. Generally, you see tuples limited to 5-tuples or smaller
 
 =(1,2)= is valid, so is =(1, "Brad")=
   : GHCi> :info (,)
@@ -72,10 +77,12 @@ A type that can contain multiple values. May contain values of different types. 
  : GHCi> :info (->)
  : data (->) t1 t2
 
-This looks similar to the tuple constructor =(,)=. Function constructor must have 2 args, one input and one result. Note: this is *not* a data constructor. Functions at the type level are *values*
+This looks similar to the tuple constructor =(,)=. Function constructor must
+have 2 args, one input and one result. Note: this is *not* a data
+constructor. Functions at the type level are *values*
 
   : fst :: (a,b) -> a
-  Function takes 2 params =(a,b)= and =a=. 
+  Function takes 2 params =(a,b)= and =a=.
 
 
 ** Typeclass constraints
@@ -105,7 +112,8 @@ Even works with typically-prefix functions using bacticks!
   : True
   
 ** Type inference
-Don't necessarily need to declare types (though you should when the code is 'done')
+Don't necessarily need to declare types (though you should when the code is
+'done')
 
   : GHCi> let myHello x = "Hello " ++ x
   : GHCi> myHello "Fred"
@@ -113,3 +121,180 @@ Don't necessarily need to declare types (though you should when the code is 'don
 
   : GHCi> :t myHello
   : myHello :: [Char] -> [Char]
+  
+
+[[file:./ch05/fixit.hs][Fixit exercises]] [[file:./ch05/arith3broken.hs][broken arithmetic exercises]] [[file:./ch05/typekwondo.hs][Type-kwon-do exercises]]
+
+  
+* Chapter 6 -- Typeclasses
+In a sense, typeclasses are the opposite of types. Type declarations define how
+a type is created. Typeclass defines how type is consumed.
+
+** Example using Bool
+   has instances for =Bounded=, =Enum=, =Eq=, =Ord=, =Read= (shouldn't be
+   used...), =Show=
+   
+** The =Eq= typeclass
+
+  : GHCi> :info Eq
+  : class Eq a where
+  :   (==) :: a -> a -> Bool
+  :   (/=) :: a -> a -> Bool
+
+Two basic functions, equal and not equal. There are many, many instances of Eq,
+as you'd expect.
+
+** Writing typeclass instances
+
+[[http://hackage.haskell.org/package/base][Hackage]] will tell you what the minimal complete definition is. In the case of
+=Eq= it is: either == or /=
+
+Simple example of defining an instance:
+#+BEGIN_SRC haskell
+data Trivial = Trivial
+
+instance Eq Trivial where Trivial == Trivial = True #+END_SRC
+  
+More complex:
+
+#+BEGIN_SRC haskell
+data DayOfWeek = Mon | Tue | Wed | Thu | Fri | Sat | Sun data Date = Date
+DayOfWeek Int
+
+instance Eq DayOfWeek where (==) Mon Mon = True (==) Tue Tue = True (==) Wed Wed
+  = True (==) Thu Thu = True (==) Fri Fri = True (==) Sat Sat = True (==) Sun
+  Sun = True (==) _ _ = False
+  
+  
+
+-- Didn't rewrite equality for the 2 parts of the product type. Just stated that
+--   it is only equal if both parts are equal instance Eq Date where (==) (Date
+--   weekday dayOfMonth) (Date weekday' dayOfMonth') = weekday == weekday' &&
+--   dayOfMonth == dayOfMonth' #+END_SRC
+
+*** Aside: partial functions
+
+What if we left off the last =(==) _ _ = False=, above? We'd have a partial
+function that would blow up at runtime. GHC can help us with this, using =-Wall=
+flag to turn on all warnings. This will give us a warning that not all patterns
+were matched.
+
+Another example of a partial function:
+#+BEGIN_SRC haskell
+f :: Int -> Bool f 2 = True #+END_SRC
+
+All cases except 2 are unhandled!!
+
+*** Back to writing typeclass instances
+
+#+BEGIN_SRC haskell
+
+data Identity a = Identity a
+
+-- Won't work!! 'a' might not have an instance of Eq instance Eq (Identity a)
+where (==) (Identity v) (Identity v') = v == v'
+
+-- Will work, since now we require type a to have Eq instance instance Eq a =>
+Eq (Identity a) where (==) (Identity v) (Identity v') = v == v'
+
+#+END_SRC
+
+[[file:./ch06/eqinstances.hs][Eq instance practice]]
+
+
+*** Numeric computation defaults
+How haskell defines defaults for typeclasses by default when no specific
+instance/type is given. This could be a warning with =-Wall=
+#+BEGIN_SRC haskell
+default Num Integer default Real Integer default Enum Integer default Integral
+Integer default Fractional Double default RealFrac Double default Floating
+Double default RealFloat Double
+
+#+END_SRC
+
+As an example,
+
+  : (/) :: Fractional a => a -> a -> a
+defaults to
+  : (/) :: Double -> Double -> Double
+
+
+We can go from general to more specific:
+  : let add = (+) :: Integer -> Integer -> Integer
+
+But you can't go back:
+  : let myAdd = add :: Num a => a -> a -> a -- ERROR!!
+  
+** =Ord= Typeclass
+Constrained by =Eq=, because in order to order things, you need to be able to
+tell if they are equal (or not equal).
+
+#+BEGIN_SRC haskell
+-- Defined by Haskell/GHC: data Ordering = LT | EQ | GT -- numerous typeclass
+instances #+END_SRC
+
+
+*** Deriving typeclass instances
+
+#+BEGIN_SRC haskell
+-- Derive Eq, and just implement custom Ord logic data DayOfWeek = Mon | Tue |
+Wed | Thu | Fri | Sat | Sun deriving (Eq, Show)
+  
+-- Make Fri better than anything else, all else is equal instance Ord DayOfWeek
+where compare Fri Fri = EQ compare Fri _ = GT compare _ Fri = LT compare _ _ =
+EQ
+
+#+END_SRC
+
+Over-specifying typeclass:
+
+#+BEGIN_SRC haskell
+  check' :: Ord a => a -> a -> Bool check' a a' = a == a' #+END_SRC This
+  compiles because =Ord= implies =Eq=. But this is overly-specific! In real
+  code, we would want to use the =Eq= typeclass instad to provide a more general
+  type signature.
+
+** =Enum= typeclass
+defines succ, pred methods, among others. Numbers and characters have successors
+and predecessors, so they are good examples here.
+
+** =Show= typeclass
+
+  : showsPrec :: Int -> a -> ShowS
+  : show :: a -> String
+  : showList :: [a] -> ShowS
+  
+Used to get string representation. Used a lot when we're in GHCi. Many, many,
+many instances of this typeclass.
+
+
+** Aside: =print=
+
+  : GHCi> :t print
+  : print :: Show a => a -> IO ()
+
+Result is =IO= that returns =()=. IO is an action that has side effects when
+performed. Could be reading from input, printing to screen, etc. This returns an
+empty tuple, called _unit_ IO actions must return something, so we return an
+empty tuple to signify we're totally done.
+
+The =print= function, when run, first prints the value of the =Show= instance to
+the screen, then complete the action by returning =unit=.
+
+=IO= can produce something other than =unit=, e.g. =IO String=, which represents
+a means of getting a =String=.
+
+** =Read= typeclass
+Given a =String=, turn it into a /thing/. This is /not/ a serialization
+format. Be careful when using =Read=, because of the input from String. String
+is a list, which could be empty or /stretch to infinity/.
+
+
+Also, note the type signature:
+  : GHCi> :t read
+  : read :: Read a => String -> a
+
+No way this always works. The failure case is not covered by this
+construct. Would throw an exception (this is a partial function. Doesn't cover
+things like infinite lists, empty lists, maybe, etc. Up to specific typeclass
+instance, of course).
