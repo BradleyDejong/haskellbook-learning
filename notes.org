@@ -298,3 +298,96 @@ No way this always works. The failure case is not covered by this
 construct. Would throw an exception (this is a partial function. Doesn't cover
 things like infinite lists, empty lists, maybe, etc. Up to specific typeclass
 instance, of course).
+
+* Chapter 7 -- More functional patterns
+  
+All functions can be used in an expression, as a value, passed as a parameter,
+etc. "A value that can be used as an argument to a function is a *first-class*
+value."
+
+Value with no parameters:
+#+BEGIN_SRC haskell
+myNum :: Integer
+myNum = 1
+
+myVal = myNum
+#+END_SRC
+
+1 parameter, /f/
+#+BEGIN_SRC haskell
+myNum :: Integer
+myNum = 1
+
+myVal f = myNum
+#+END_SRC
+
+As written above, f can be of any type. We could restrict that by using it in
+the body:
+#+BEGIN_SRC haskell
+myVal f = f + myNum
+#+END_SRC
+
+Now, f /must/ be a =Num=, since =(+)= operates on =Num=s
+
+** Anonymous functions
+Can be used without a name
+#+BEGIN_SRC haskell
+(\x -> x * 3) :: Integer -> Integer
+#+END_SRC
+The above could be used inline.
+
+
+** Higher-order functions
+
+Higher-order functions -- functions that accept functions as arguments
+
+** Guards
+
+#+BEGIN_SRC haskell
+myAbs :: Integer -> Integer
+myAbs x
+  | x < 0     = (-x)
+  | otherwise = x
+#+END_SRC
+
+New lines begin with a pipe (=|=) to begin a guard case. Guard cases must
+evaluate to a =Bool=. =otherwise= is a name for =True=, often used as a
+fallback.
+
+** Function composition
+
+A higher-order function =(.)= that allows combining of functions.
+
+#+BEGIN_SRC haskell
+(.) :: (b -> c) -> (a -> b) -> a -> c
+#+END_SRC
+
+That is, it takes a funciton that tranlates =a= to =b= and a function that
+translates =b= to =c=, and returns a new function that glues them together,
+translating =a= to =c=.
+
+*** Point-free functions
+Getting rid of arguments
+
+#+BEGIN_SRC haskell
+f x = negate . sum $ x
+#+END_SRC
+is the same as
+
+#+BEGIN_SRC haskell
+f = negate . sum
+#+END_SRC
+
+** Composition
+
+Remember the types of =putStrLn= and =print=
+
+#+BEGIN_SRC haskell
+putStrLn :: String -> IO ()
+
+print :: Show a => a -> IO ()
+#+END_SRC
+
+=print= is just the composition of =show= and =putStrLn=. That is, the input to
+=print= must have a =Show= instance, and therefore =print= can be defined as
+=putStrLn . show=.
