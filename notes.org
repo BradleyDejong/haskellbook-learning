@@ -493,3 +493,5 @@ The above uses haskell idiom =go=. We need to add an additional argument to our
 function to track the result we have so far. In this case, we add 1 to count
 every time we recurse, so the =go= function has an additional input =count=.
 
+
+* Chapter 9 -- Lists
