@@ -32,14 +32,24 @@ squishAgain :: [[a]] -> [a]
 squishAgain = squishMap id
 
 
-myMaximumBy :: (a -> a -> Ordering) -> [a] -> Maybe a
-myMaximumBy f = foldr comp Nothing
+myMaximumBy :: (a -> a -> Ordering) -> [a] -> a
+myMaximumBy f (x:xs)= foldr comp x xs
   where
-    comp a Nothing = Just a
-    comp a (Just b) = if f a b == GT then Just a else Just b
+    comp a b = if f a b == GT then a else b
 
-myMinimumBy :: (a -> a -> Ordering) -> [a] -> Maybe a
-myMinimumBy f = foldr comp Nothing
+myMinimumBy :: (a -> a -> Ordering) -> [a] -> a
+myMinimumBy f (x:xs)= foldr comp x xs
+  where
+    comp a b = if f a b == LT then a else b
+
+myMinimumBy' :: (a -> a -> Ordering) -> [a] -> Maybe a
+myMinimumBy' f = foldr comp Nothing
   where
     comp a Nothing = Just a
     comp a (Just b) = if f a b == LT then Just a else Just b
+
+myMaximumBy' :: (a -> a -> Ordering) -> [a] -> Maybe a
+myMaximumBy' f = foldr comp Nothing
+  where
+    comp a Nothing = Just a
+    comp a (Just b) = if f a b == GT then Just a else Just b
