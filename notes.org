@@ -497,5 +497,7 @@ every time we recurse, so the =go= function has an additional input =count=.
 * Chapter 9 -- Lists
 
 * Chapter 10 -- Folding Lists
+  
+* Chapter 11 -- Algebraic data types
 
   
